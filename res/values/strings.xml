@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Upcoming Episodes</string>
+    <string name="title_episode_detail">Episode Detail</string>
+    <string name="refresh">Refresh</string>
+
+</resources>
