@@ -1,6 +1,9 @@
 
 package lost.cart.apps.upcomingepisodes;
 
+import com.manuelpeinado.refreshactionitem.ProgressIndicatorType;
+import com.manuelpeinado.refreshactionitem.RefreshActionItem;
+import com.manuelpeinado.refreshactionitem.RefreshActionItem.RefreshActionListener;
 import com.nostra13.universalimageloader.cache.disc.naming.Md5FileNameGenerator;
 import com.nostra13.universalimageloader.core.DisplayImageOptions;
 import com.nostra13.universalimageloader.core.ImageLoader;
@@ -16,6 +19,9 @@ import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -35,7 +41,7 @@ import lost.cart.apps.upcomingepisodes.data.GetEpisodesService;
  * interface.
  */
 public class EpisodeListFragment extends ListFragment implements
-        LoaderManager.LoaderCallbacks<Cursor> {
+        LoaderManager.LoaderCallbacks<Cursor>, RefreshActionListener {
 
     /**
      * The serialization (saved instance state) Bundle key representing the
@@ -58,6 +64,10 @@ public class EpisodeListFragment extends ListFragment implements
      * Identifier for the cursor loader
      */
     private static final int EPISODE_LIST = 1;
+    /**
+     * ActionBar item to show refresh state.
+     */
+    private RefreshActionItem mRefreshActionItem;
 
     /**
      * A callback interface that all activities containing this fragment must
@@ -116,6 +126,8 @@ public class EpisodeListFragment extends ListFragment implements
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
+        
         mAdapter = new SimpleCursorAdapter(getActivity(), R.layout.episode_list_row, null,
                 new String[] {
                         ContentDescriptor.Episode.Cols.TITLE,
@@ -134,8 +146,35 @@ public class EpisodeListFragment extends ListFragment implements
 
         mAdapter.setViewBinder(new EpisodeBinder());
     }
+    
+	@Override
+	public void onCreateOptionsMenu(Menu menu, MenuInflater menuInflater) {
+		menuInflater.inflate(R.menu.fragment_episode_list, menu);
+		MenuItem item = menu.findItem(R.id.refresh);
+		mRefreshActionItem = (RefreshActionItem) item.getActionView();
+		mRefreshActionItem.setMenuItem(item);
+		mRefreshActionItem
+				.setProgressIndicatorType(ProgressIndicatorType.INDETERMINATE);
+		mRefreshActionItem.setRefreshActionListener(this);
 
-    @Override
+	}
+	
+	@Override
+	public void onRefreshButtonClick(RefreshActionItem sender) {
+		refreshData();
+
+	}
+
+    private void refreshData() {
+    	if(mRefreshActionItem != null){
+    		mRefreshActionItem.showProgress(true);	
+    	}
+        final Intent msgIntent = new Intent(this.getActivity(), GetEpisodesService.class);
+        getActivity().startService(msgIntent);
+		
+	}
+
+	@Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
@@ -223,11 +262,13 @@ public class EpisodeListFragment extends ListFragment implements
     @Override
     public void onLoadFinished(Loader<Cursor> arg0, Cursor arg1) {
         if (arg1 != null) {
+        	if(mRefreshActionItem != null){
+        		mRefreshActionItem.showProgress(false);
+        	}
             mAdapter.swapCursor(arg1);
         } else {
             // No current results so try and get some..
-            final Intent msgIntent = new Intent(getActivity(), GetEpisodesService.class);
-            this.getActivity().startService(msgIntent);
+        	refreshData();
         }
 
     }

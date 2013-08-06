@@ -3,8 +3,7 @@
 
     <item
         android:id="@+id/refresh"
-        android:icon="@drawable/ic_action_reload"
-        android:orderInCategory="100"
+        android:actionViewClass="com.manuelpeinado.refreshactionitem.RefreshActionItem"
         android:showAsAction="always"
         android:title="@string/refresh"/>
 

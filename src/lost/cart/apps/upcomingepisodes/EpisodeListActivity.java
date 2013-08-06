@@ -2,12 +2,9 @@
 package lost.cart.apps.upcomingepisodes;
 
 
-import lost.cart.apps.upcomingepisodes.data.GetEpisodesService;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.view.Menu;
-import android.view.MenuItem;
 
 /**
  * An activity representing a list of Episodes. This activity has different
@@ -76,22 +73,6 @@ public class EpisodeListActivity extends FragmentActivity implements EpisodeList
             detailIntent.putExtra(EpisodeDetailFragment.ARG_ITEM_ID, id);
             startActivity(detailIntent);
         }
-    }
-    
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.activity_episode_list, menu);
-        return true;
-    }
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.refresh:
-                final Intent msgIntent = new Intent(this, GetEpisodesService.class);
-                startService(msgIntent);
-                return true;
-        }
-        return super.onOptionsItemSelected(item);
     }
 
 }
